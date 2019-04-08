@@ -236,8 +236,9 @@ class Peticinoes{
 		if ($admin) {
 			$sql.=';';
 		}else{
-			$admin.=' AND pr.ID_PERSONA='.$iduser.';';
+			$sql.=' AND pr.ID_PERSONA='.$iduser.';';
 		}
+		#echo $sql;
 		$mensaje='';
 		if ($resultado=$this->db->query($sql)) {
 	    	if($resultado->num_rows==0){
@@ -445,6 +446,106 @@ class Peticinoes{
     	}else{
     		echo $this->reload;
     	}
+	}
+	public function missolicitudresolve(){
+		$id=$this->getId();
+    	$mensaje="Error en la sesión";
+    	$error=true;
+    	$datos="";
+    	$tit='resueltas';
+    	$mc='002';
+    	//echo $id;
+    	if ($id!=0) {
+    		$rol=$this->getRol($id);
+    		//echo $rol;
+	    	if ($rol==3) {
+	    		$mensaje=$this->getServiciosUF(1,false,$id);
+	    		#echo "sadsadsadasdasdsadasd";
+				include_once('../View/ajax/solicitudes.php');
+	    	}else{
+	    		$mensaje="No tienes permiso para realizar esta operación";
+	    	}
+    	}else{
+    		echo $this->reload;
+    	}
+	}
+	public function missolicitudnoresolve(){
+		$id=$this->getId();
+    	$mensaje="Error en la sesión";
+    	$error=true;
+    	$datos="";
+    	$tit='resueltas';
+    	$mc='002';
+    	//echo $id;
+    	if ($id!=0) {
+    		$rol=$this->getRol($id);
+    		//echo $rol;
+	    	if ($rol==3) {
+	    		$mensaje=$this->getServiciosUF(1,false,$id);
+				include_once('../View/ajax/solicitudes.php');
+	    	}else{
+	    		$mensaje="No tienes permiso para realizar esta operación";
+	    	}
+    	}else{
+    		echo $this->reload;
+    	}
+	}
+	public function missolicitudwait(){
+		$id=$this->getId();
+    	$mensaje="Error en la sesión";
+    	$error=true;
+    	$datos="";
+    	$tit='resueltas';
+    	$mc='002';
+    	//echo $id;
+    	if ($id!=0) {
+    		$rol=$this->getRol($id);
+    		//echo $rol;
+	    	if ($rol==3) {
+	    		$mensaje=$this->getServiciosUF(3,false,$id);
+				include_once('../View/ajax/solicitudes.php');
+	    	}else{
+	    		$mensaje="No tienes permiso para realizar esta operación";
+	    	}
+    	}else{
+    		echo $this->reload;
+    	}
+	}
+	private function getServiciosUF($type,$admin=true,$iduser=0)	{
+		$sql='SELECT s.ID_SOLICITUD ids, pe.NOMBRE_PERSONA nompe,pe.APELLIDO_PATERNO patpe,pe.APELLIDO_MATERNO matpe,st.NOMBRE_STATUS st, s.NOMBRE_SOLICITUD sol,s.FECHA_CREADO enviado,s.DESCRIPCION_SOLICITUD des,s.FECHA_EDITADO recibido FROM solicitudes s,personas pe, status st WHERE s.ID_PERSONA=pe.ID_PERSONA AND st.ID_STATUS=s.ID_STATUS AND s.ID_STATUS='.$type;
+		if ($admin) {
+			$sql.=';';
+		}else{
+			$sql.=' AND pe.ID_PERSONA='.$iduser.';';
+		}
+		#echo $sql;
+		$mensaje='';
+		if ($resultado=$this->db->query($sql)) {
+	    	if($resultado->num_rows==0){
+	    		$mensaje.='<tr><td colspan="6">No hay resultados</td></tr>';
+	    	}else{
+				while ($row = $resultado->fetch_assoc()) {
+					$ids=$row['ids'];
+					$reciv=$row['recibido'];
+					$mensaje.='<tr>'.
+						'<td>'. $row['nompe'].' '. $row['patpe'].' '. $row['matpe'].'</td>';
+					if ($admin) {
+						$mensaje.='<td>'.$row['nompr'].' '. $row['patpr'].' '. $row['matpr'].'</td>';
+					}
+					$mensaje.='<td>'. $row['sol'].'</td>'.
+						'<td>'. $row['des'].'</td>'.
+						'<td>'. $this->getDate($row['enviado']).'</td>'.
+						'<td><i class="fas fa-trash point p03 fa-lg red-text tooltipped" onclick="app.eliminar('.$ids.')"'.$this->tool('Eliminar').'></i>'.
+						'<i class="fas fa-info-circle p03 fa-lg point blue-text tooltipped detailM" data-refer=\''.$ids.'\' '.$this->tool('Detalles').'></i></td>'.
+					'</tr>' ;
+					if (is_null($reciv)&&!admin) {
+						$this->servicioReciv($ids);
+					}
+				}
+			}
+		}
+		return $mensaje;
+
 	}
 }
 ?>
