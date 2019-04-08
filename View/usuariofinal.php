@@ -82,46 +82,56 @@ if (isset($_SESSION['idu'])) {
       </div>
     </header>
     <main>
-
+    
       <div class="contenedor" id="test1">
         <div class="row">
-          <div class="carousel" id="test1"><img src="img/servicios/mama.jpg" width="1200px" height="300px" align="center"></div>
-          <div class="carousel" id="test1"><img src="img/servicios/presion.jpg" width="1200px" height="300px" align="center"></div>
+          <div class="carousel"><img src="img/servicios/mama.jpg" width="1200px" height="300px" align="center"></div>
+          <div class="carousel"><img src="img/servicios/presion.jpg" width="1200px" height="300px" align="center"></div>
           </div>
+      </div>
+
+      <div class="contenedor" id="nuevasolicitud">
+        <form onsubmit="app.enviarSolicitud();return false;" id="soliNuevC">
+          <div class="row">
+            <div class=" s12 m1"></div>
+            <div class="input-field col s12 m10">
+              <select id="tipoSOL">
+                <option value="0" disabled selected>Seleccione</option>
+                <option value="1">Pregunta</option>
+                <option value="2">Incidente</option>
+                <option value="3">Solicitud de servico</option>
+                <option value="4">Problema</option>
+              </select>
+              <label>Tipo</label>
+            </div>
+            <div class=" s12 m1"></div>
+            <div class="input-field col s12 m10">
+              <input id="titulo_solicitud" type="text" class="validate" required>
+              <label for="titulo_solicitud">Titulo de la Solicitud</label>
+            </div>
+            <div class="s12 m1"></div>
+            <div class="input-field col s12 m10">
+              <input id="descripcion_solicitud" type="text" class="validate" required>
+              <label for="descripcion_solicitud">Descripción de la Solicitud</label>
+            </div>
           </div>
+          <div class="row" align="right">
+          <button class="waves-effect waves-light btn" type="submit" id="guardarsolibtn"><i class="material-icons right">Enviar</i></button>
+          </div>
+        </form>
+      </div>
 
-          <div class="contenedor" id="nuevasolicitud">
-      <div class="row">
-        <div class="input-field col s12">
-          <input placeholder="Coloque el titulo de su solicitud" id="titulo_solicitud" type="text" class="validate">
-          <label for="titulo_solicitud">Titulo de la Solicitud</label>
-        </div>
-        <div class="input-field col s12">
-          <input placeholder="Coloque la descripcion de su solicitud" id="descripcion_solicitud" type="text" class="validate">
-          <label for="descripcion_solicitud">Descripción de la Solicitud</label>
-        </div>
-      </div>
-      <div class="row">
-        <div <button class="btn waves-effect waves-light" type="submit" name="action">
-          <i class="material-icons right">Enviar archivo</i>
-          </button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <input placeholder="Coloque el tema de la solicitud" id="tema_solicitud" type="text" class="validate">
-          <label for="email">Tema de la solicitud</label>
-        </div>
-      </div>
-        <div class="row" align="right">
-        <a class="waves-effect waves-light btn"><i class="material-icons left">Cancelar</i></a>
-        <a class="waves-effect waves-light btn"><i class="material-icons right">Enviar</i></a>
-        </div>
-    </form>
-  </div>
+      <div id="test3" class="contenedor" >
+        <ul class="tabs tabs-transparent blue darken-2 z-depth-1">
+              <li class="tab col s4" data-get="missolicitudnoresolve"><a class="active" href="#missolicitudnoresolve"><i class="far fa-clock"></i><sapan class="hide-on-small-only"> Sin Resolver</sapan></a></li>
+              <li class="tab col s4" data-get="missolicitudresolve"><a href="#missolicitudresolve"><i class="far fa-check-circle"></i><sapan class="hide-on-small-only"> Resuelto</sapan></a></li>
+              <li class="tab col s4" data-get="missolicitudwait"><a href="#missolicitudwait"><i class="far fa-arrow-circle-down"></i><sapan class="hide-on-small-only"> En espera</sapan></a></li>
+        </ul>
+        <div id="missolicitudnoresolve" class="col s12">Espere porfavor</div>
+        <div id="missolicitudresolve" class="col s12">Test 4</div>
+        <div class="col s12" id="missolicitudwait"></div>
 
-          <div id="test3" class="col s12">Test 3</div>
-        </div>   
+      </div>
     <footer class="page-footer blue darken-4">
       <div class="footer-copyright">
         <div class="container">
@@ -135,9 +145,44 @@ if (isset($_SESSION['idu'])) {
     <script src="./js/materialize.js"></script>
     <script src="./js/app.js"></script>
     <script src="./js/script.js"></script>
-    <!-- Chart Plugins Js -->
-    <script src="./js/chartjs/Chart.bundle.js"></script>
-    <script src="./js/chartjs.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('select').material_select();
+        app.loadEl('missolicitudnoresolve','missolicitudnoresolve');
+        app.enviarSolicitud=function(){
+          btn=$("#guardarsolibtn");
+          btn1=btn.html();
+          app.btnL(btn);
+          try{
+            nom=$("#titulo_solicitud").val();
+            det=$("#descripcion_solicitud").val();
+            tipo=$("#tipoSOL").val();
+            if (tipo==0) {
+              app.alert('Seleccione tipo','red');return false;
+            }
+            datos={
+              url:'../Controller/guardar.php',
+              type:'post',
+              data:{'dir':'nuevasolicitud','nombre':nom,'detalles':det,'tipo':tipo},
+              success:function(req){
+                app.btnR(btn,btn1);
+                if(req==1){
+                    app.alert('Enviado','green');
+                    document.getElementById('soliNuevC').reset();
+                }else{
+                   app.alert(req,'red');
+                }
+              },
+              error:function(){
+                app.alert('Erro inesperado','red');
+                app.btnR(btn,btn1);
+              }
+            };
+            app.send(datos);
+          }catch(e){console.log(e);app.btnR(btn,btn1);return false;}
+        }
+      });
+    </script>
 
   </body>
 </html>
