@@ -448,6 +448,36 @@ class Guardar{
 	    }
     	echo $mensaje;
 	}
+	/***************************************************solicitudes*******************/
+	public function nuevasolicitud(){
+		$id=$this->getId();
+    	$mensaje="Error en la sesión";
+    	if ($id!=0) {
+    		$rol=$this->getRol($id);
+	    	if ($rol==3) {
+	    		$nombre=$_POST['nombre'];
+	    		$detalle=$_POST['detalles'];
+	    		$tipo=$_POST['tipo'];
+	    		if ($nombre==null||$nombre=='undefined'||$detalle==null||$detalle=='undefined'||$tipo==null||$thipo=='0') {
+	    			$mensaje='Faltan parametros';
+	    		}else{
+	    			$sql="INSERT INTO solicitudes(ID_TIPO,ID_PERSONA,ID_STATUS,NOMBRE_SOLICITUD,FECHA_CREADO,DESCRIPCION_SOLICITUD) VALUES  (".$tipo.",".$id.",3,'".$nombre."',now(), '".$detalle."');";
+	    			//echo $sql;
+	    			$result=$this->db->exec($sql);
+	    			//var_dump($result);
+	    			if ($result['STATUS']=='OK') {
+	    				$mensaje=1;
+	    			}else{
+	    				echo $result['ERROR'];
+	    				$mensaje='Error al guardar datos';
+	    			}
+	    		}
+	    	}else{
+	    		$mensaje="No tienes permiso para realizar esta operación";
+	    	}
+    	}
+    	echo $mensaje;
+	}
 }
 
  ?>
